@@ -6,6 +6,71 @@ import seaborn as sns
 
 st.title("Welcome to the data cleaning app!")
 
+def choosing_final_format(unmodified_data_frame,reset_dataframe)
+        st.write("You can select each option and download each csv if you would like more than one option.")
+        choice = st.radio("Do you want to now remove all rows with null values, replace all null values, or recieve your data frame with any columns you decided to remove now removed?", ["Remove", "Replace","Recieve as is"])
+
+    
+        if choice == "Remove":
+            unmodified_data_frame = reset_data_frame
+            unmodified_data_frame = unmodified_data_frame.dropna().reset_index(drop=True)
+            unmodified_data_frame = unmodified_data_frame.replace("___MISSING VAL HiHi___",np.nan)
+            st.write("Here’s the head of your DataFrame:")
+            st.dataframe(unmodified_data_frame.head())
+            
+            # Convert DataFrame to CSV bytes
+            csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
+            
+            # Download button
+            st.download_button(
+                label="Download CSV",
+                data=csv_bytes,
+                file_name="cleaned_data.csv",
+                mime="text/csv",
+                key = 'removal')
+            
+        if choice == "Replace":
+            unmodified_data_frame = reset_data_frame
+            # Only replace NaNs in numeric columns
+            numeric_cols = unmodified_data_frame.select_dtypes(include=np.number).columns
+
+            for col in numeric_cols:
+                unmodified_data_frame[col] = unmodified_data_frame[col].fillna(unmodified_data_frame[col].mean())
+            unmodified_data_frame = unmodified_data_frame.replace("___MISSING VAL HiHi___",np.nan)
+            
+            st.write("Here’s the head of your DataFrame:")
+            st.dataframe(unmodified_data_frame.head())
+            
+            # Convert DataFrame to CSV bytes
+            csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
+            
+            # Download button
+            st.download_button(
+                label="Download CSV",
+                data=csv_bytes,
+                file_name="cleaned_data.csv",
+                mime="text/csv",
+                key = 'replacing'
+            )
+            
+        if choice == "Recieve as is":
+            unmodified_data_frame = reset_data_frame
+            unmodified_data_frame = unmodified_data_frame.replace("___MISSING VAL HiHi___",np.nan)
+            
+            st.write("Here’s the head of your DataFrame:")
+            st.dataframe(unmodified_data_frame.head())
+            
+            # Convert DataFrame to CSV bytes
+            csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
+            
+            # Download button
+            st.download_button(
+                label="Download CSV",
+                data=csv_bytes,
+                file_name="cleaned_data.csv",
+                mime="text/csv",
+                key = 'get it back'
+            )
 
 # This is for a variables used later on
 if "columns_to_keep" not in st.session_state:
@@ -76,44 +141,8 @@ if uploaded_file:
         else:
             st.write("We found no columns with over 40% missing values.")
             columns_to_keep = None
-            choice = st.radio("Do you want to now remove all rows with null values, replace all null values, or recieve your data frame with any columns you decided to remove now removed?", ["Remove", "Replace","Recieve as is"])
-            if choice == "Remove":
-                df = df_temp
-                df = df.dropna().reset_index(drop=True)
-                df = df.replace("___MISSING VAL HiHi___",np.nan)
-                st.write("Here’s the head of your DataFrame:")
-                st.dataframe(df.head())
-            
-            if choice == "Replace":
-                df = df_temp
-                # Only replace NaNs in numeric columns
-                numeric_cols = df.select_dtypes(include=np.number).columns
+            choosing_final_format(df,df_temp)
 
-                for col in numeric_cols:
-                    df[col] = df[col].fillna(df[col].mean())
-                df = df.replace("___MISSING VAL HiHi___",np.nan)
-                
-                st.write("Here’s the head of your DataFrame:")
-                st.dataframe(df.head())
-                
-            if choice == "Recieve as is":
-                df = df_temp
-                df = df.replace("___MISSING VAL HiHi___",np.nan)
-                
-                st.write("Here’s the head of your DataFrame:")
-                st.dataframe(df.head())
-            
-            # Convert DataFrame to CSV bytes
-            csv_bytes = df.to_csv(index=False).encode('utf-8')
-            
-            # Download button
-            st.download_button(
-                label="Download CSV",
-                data=csv_bytes,
-                file_name="cleaned_data.csv",
-                mime="text/csv",
-                key = 'get it back'
-            )
 
         st.session_state['count_above'] = count_above
 
@@ -161,68 +190,4 @@ if uploaded_file:
 
 # The final section - getting their data back!
         
-        st.write("You can select each option and download each csv if you would like more than one option.")
-        
-        choice = st.radio("Do you want to now remove all rows with null values, replace all null values, or recieve your data frame with any columns you decided to remove now removed?", ["Remove", "Replace","Recieve as is"])
-
-    
-        if choice == "Remove":
-            df = my_df_2
-            df = df.dropna().reset_index(drop=True)
-            df = df.replace("___MISSING VAL HiHi___",np.nan)
-            st.write("Here’s the head of your DataFrame:")
-            st.dataframe(df.head())
-            
-            # Convert DataFrame to CSV bytes
-            csv_bytes = df.to_csv(index=False).encode('utf-8')
-            
-            # Download button
-            st.download_button(
-                label="Download CSV",
-                data=csv_bytes,
-                file_name="cleaned_data.csv",
-                mime="text/csv",
-                key = 'removal')
-            
-        if choice == "Replace":
-            df = my_df_2
-            # Only replace NaNs in numeric columns
-            numeric_cols = df.select_dtypes(include=np.number).columns
-
-            for col in numeric_cols:
-                df[col] = df[col].fillna(df[col].mean())
-            df = df.replace("___MISSING VAL HiHi___",np.nan)
-            
-            st.write("Here’s the head of your DataFrame:")
-            st.dataframe(df.head())
-            
-            # Convert DataFrame to CSV bytes
-            csv_bytes = df.to_csv(index=False).encode('utf-8')
-            
-            # Download button
-            st.download_button(
-                label="Download CSV",
-                data=csv_bytes,
-                file_name="cleaned_data.csv",
-                mime="text/csv",
-                key = 'replacing'
-            )
-            
-        if choice == "Recieve as is":
-            df = my_df_2
-            df = df.replace("___MISSING VAL HiHi___",np.nan)
-            
-            st.write("Here’s the head of your DataFrame:")
-            st.dataframe(df.head())
-            
-            # Convert DataFrame to CSV bytes
-            csv_bytes = df.to_csv(index=False).encode('utf-8')
-            
-            # Download button
-            st.download_button(
-                label="Download CSV",
-                data=csv_bytes,
-                file_name="cleaned_data.csv",
-                mime="text/csv",
-                key = 'get it back'
-            )
+        choosing_final_format(df,my_df_2)
