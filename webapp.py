@@ -76,17 +76,6 @@ if uploaded_file:
         else:
             st.write("We found no columns with over 40% missing values.")
             columns_to_keep = None
-
-        st.session_state['count_above'] = count_above
-
-    if 'count_above' in st.session_state and columns_to_keep != None:
-        threshold = st.session_state["threshold"]
-        st.session_state["columns_to_keep"] = st.multiselect("Select columns to KEEP",options=missing_by_column[missing_by_column > threshold].index.tolist(),default=st.session_state.get("columns_to_keep", []))
-
-        if st.button("Save my preferences"):
-            st.session_state['clicked1'] = True
-
-        if count_above == 0:
             choice = st.radio("Do you want to now remove all rows with null values, replace all null values, or recieve your data frame with any columns you decided to remove now removed?", ["Remove", "Replace","Recieve as is"])
             if choice == "Remove":
                 df = df_temp
@@ -125,6 +114,15 @@ if uploaded_file:
                 mime="text/csv",
                 key = 'get it back'
             )
+
+        st.session_state['count_above'] = count_above
+
+    if 'count_above' in st.session_state and columns_to_keep != None:
+        threshold = st.session_state["threshold"]
+        st.session_state["columns_to_keep"] = st.multiselect("Select columns to KEEP",options=missing_by_column[missing_by_column > threshold].index.tolist(),default=st.session_state.get("columns_to_keep", []))
+
+        if st.button("Save my preferences"):
+            st.session_state['clicked1'] = True
 
             
     if st.session_state['clicked1'] == True:
