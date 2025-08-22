@@ -90,7 +90,9 @@ if "missing_by_column" not in st.session_state:
 
 if "threshold" not in st.session_state:
     st.session_state["threshold"] = None
-
+        
+if "missing_val" not in st.session_state:
+    st.session_state["missing_val"] = "hello"
 
 # Allow users to upload a CSV file (eventually expand to an option menu for many different file types)
 uploaded_file = st.file_uploader("Upload your CSV", type=["csv", "xlsx"])
