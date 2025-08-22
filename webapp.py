@@ -6,10 +6,9 @@ import seaborn as sns
 
 st.title("Welcome to the data cleaning app!")
 
-def choosing_final_format(unmodified_data_frame,reset_data_frame):
+def choosing_final_format(unmodified_data_frame,reset_data_frame,missing_val=st.session_state["missing_val"]):
         st.write("You can select each option and download each csv if you would like more than one option.")
         choice = st.radio("Do you want to now remove all rows with null values, replace all null values, or recieve your data frame with any columns you decided to remove now removed?", ["Remove", "Replace","Recieve as is"])
-        missing_val = st.session_state("missing_val")
     
         if choice == "Remove":
             unmodified_data_frame = reset_data_frame
