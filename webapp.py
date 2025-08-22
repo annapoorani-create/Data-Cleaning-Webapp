@@ -17,16 +17,6 @@ def choosing_final_format(unmodified_data_frame,reset_data_frame,missing_val=st.
             st.write("Here’s the head of your DataFrame:")
             st.dataframe(unmodified_data_frame.head())
             
-            # Convert DataFrame to CSV bytes
-            csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
-            
-            # Download button
-            st.download_button(
-                label="Download CSV",
-                data=csv_bytes,
-                file_name="cleaned_data.csv",
-                mime="text/csv",
-                key = 'removal')
             
         if choice == "Replace":
             unmodified_data_frame = reset_data_frame
@@ -40,18 +30,6 @@ def choosing_final_format(unmodified_data_frame,reset_data_frame,missing_val=st.
             st.write("Here’s the head of your DataFrame:")
             st.dataframe(unmodified_data_frame.head())
             
-            # Convert DataFrame to CSV bytes
-            csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
-            
-            # Download button
-            st.download_button(
-                label="Download CSV",
-                data=csv_bytes,
-                file_name="cleaned_data.csv",
-                mime="text/csv",
-                key = 'replacing'
-            )
-            
         if choice == "Recieve as is":
             unmodified_data_frame = reset_data_frame
             unmodified_data_frame = unmodified_data_frame.replace("___MISSING VAL HiHi___",missing_val)
@@ -59,17 +37,17 @@ def choosing_final_format(unmodified_data_frame,reset_data_frame,missing_val=st.
             st.write("Here’s the head of your DataFrame:")
             st.dataframe(unmodified_data_frame.head())
             
-            # Convert DataFrame to CSV bytes
-            csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
-            
-            # Download button
-            st.download_button(
-                label="Download CSV",
-                data=csv_bytes,
-                file_name="cleaned_data.csv",
-                mime="text/csv",
-                key = 'get it back'
-            )
+    # Convert DataFrame to CSV bytes
+        csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
+    
+    # Download button
+        st.download_button(
+        label="Download CSV",
+        data=csv_bytes,
+        file_name="cleaned_data.csv",
+        mime="text/csv",
+        key = 'get it back'
+    )
 
 # This is for a variables used later on
 if "columns_to_keep" not in st.session_state:
