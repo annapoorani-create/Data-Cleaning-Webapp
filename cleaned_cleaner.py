@@ -60,10 +60,10 @@ def choosing_final_format(unmodified_data_frame,reset_data_frame,missing_val=st.
             st.write("Here’s the head of your DataFrame:")
             st.dataframe(unmodified_data_frame.head())
             
-    # Convert DataFrame to CSV bytes
+        # Convert DataFrame to CSV bytes
         csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
     
-    # Download button
+        # Download button
         st.download_button(
         label="Download CSV",
         data=csv_bytes,
@@ -98,7 +98,7 @@ if uploaded_file:
         first_button_clicked = True
         st.session_state['first_button_clicked'] = first_button_clicked
         
-    button_clicked = st.session_state["button_clicked"]
+    first_button_clicked = st.session_state["first_button_clicked"]
     
     if first_button_clicked == True:
         total_nans = df_temp.isna().sum().sum()
@@ -115,13 +115,15 @@ if uploaded_file:
             
         if count_above > 0:
             st.write(f"We found {count_above} columns in your data frame with over 40% missing values. Choose which of them you would like to KEEP - if any. If you choose to remove/replace null values later, these columns will still be preserved exactly how they are.")
-            columns_to_keep = 1
             st.session_state["columns_to_keep"] = st.multiselect("Select columns to KEEP",options=missing_by_column[missing_by_column > threshold].index.tolist(),default=st.session_state.get("columns_to_keep", []))
             columns_to_keep = st.session_state["columns_to_keep"]
             df_temp = st.session_state["df_temp"]
             df = st.session_state["df"]
                 
             if st.button("Save my preferences"):
+                st.session_state["second_button_clicked"] = True
+
+            if st.session_state["second_button_clicked"] == True:
                     # Reloading the columns to preserve, the temporary dataframe with NaNs, and the original dataframe
                     columns_to_keep = st.session_state["columns_to_keep"]
                     df_temp = st.session_state["df_temp"]
@@ -131,21 +133,19 @@ if uploaded_file:
                     if columns_to_keep != None:
                         # Save columns to be preserved
                         df_temp_2 = df_temp[columns_to_keep]
-        
-                        # Drop the rest
-                        missing_by_column = st.session_state['missing_by_column'] 
-                        threshold = st.session_state.get("threshold")
-                        for name in missing_by_column[missing_by_column > threshold].index.tolist():
-                            if name not in columns_to_keep:
-                                df_temp.drop(name,axis=1,inplace=True)
-
-                        # Prevent the NaNs in columns_to_keep to be preserved from being detected
                         df_temp_2 = df_temp_2.replace(np.nan,"___MISSING VAL HiHi___")
                         
-                    else:
-                        # Drop all unecessary columns
-                        for name in missing_by_column[missing_by_column > threshold]:
-                                df_temp.drop(name,axis=1,inplace=True)
+                        # reload some variables
+                        missing_by_column = st.session_state['missing_by_column'] 
+                        threshold = st.session_state.get("threshold")
+                        
+                    for name in missing_by_column[missing_by_column > threshold].index.tolist():
+                        df_temp.drop(name,axis=1,inplace=True)
+                        
+                    if 'df_temp_2' in locals():
+                        df_temp = pd.concat([df_temp, df_temp_2],axis=1)
+                        working_df = df_temp
+                        choosing_final_format(df_temp,working_df)
                     
         else:
             st.write("We found no columns with over 40% missing values.")
