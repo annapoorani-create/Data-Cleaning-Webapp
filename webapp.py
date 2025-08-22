@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 st.title("Welcome to the data cleaning app!")
-
+        
+if "missing_val" not in st.session_state:
+    st.session_state["missing_val"] = "hello"
+        
 def choosing_final_format(unmodified_data_frame,reset_data_frame,missing_val=st.session_state["missing_val"]):
         st.write("You can select each option and download each csv if you would like more than one option.")
         choice = st.radio("Do you want to now remove all rows with null values, replace all null values, or recieve your data frame with any columns you decided to remove now removed?", ["Remove", "Replace","Recieve as is"])
@@ -67,9 +70,7 @@ if "missing_by_column" not in st.session_state:
 
 if "threshold" not in st.session_state:
     st.session_state["threshold"] = None
-        
-if "missing_val" not in st.session_state:
-    st.session_state["missing_val"] = "hello"
+
 
 # Allow users to upload a CSV file (eventually expand to an option menu for many different file types)
 uploaded_file = st.file_uploader("Upload your CSV", type=["csv", "xlsx"])
