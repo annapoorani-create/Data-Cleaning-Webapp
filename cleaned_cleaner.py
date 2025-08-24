@@ -86,7 +86,7 @@ if uploaded_file:
         (printed above if there were any).  All unselected columns will be deleted. The multiselects will only show columns that have thus far not been selected. 
         If you choose to delete null values in a column listed above, over 40% of your data could be deleted.""")
         
-        column_names = df.columns()
+        column_names = df.columns
         
         st.session_state["columns_to_delete_nulls"] = st.multiselect("Select columns to delete all missing values from, keeping in mind this means deleting entire rows of data:",options=[x for x in column_names if x not in st.session_state["columns_to_replace_nulls"] and x not in st.session_state["columns_to_preserve_nulls"]],default=st.session_state.get("columns_to_keep", []))
         
