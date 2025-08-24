@@ -130,6 +130,9 @@ if uploaded_file:
                 df_temp = df_temp.dropna().reset_index(drop=True)
                 df_temp = df_temp.replace("__Missing__",np.nan)
 
+                st.write("Here's the head of your dataframe:")
+                st.dataframe(df_temp.head())
+
                 # Convert DataFrame to CSV bytes
                 csv_bytes = df_temp.to_csv(index=False).encode('utf-8')
             
