@@ -88,11 +88,11 @@ if uploaded_file:
         
         column_names = df.columns
         
-        st.session_state["columns_to_delete_nulls"] = st.multiselect("Select columns to delete all missing values from, keeping in mind this means deleting entire rows of data:",options=[x for x in column_names if x not in st.session_state["columns_to_replace_nulls"] and x not in st.session_state["columns_to_preserve_nulls"]],default=st.session_state.get("columns_to_keep", []))
+        st.session_state["columns_to_delete_nulls"] = st.multiselect("Select columns to delete all missing values from, keeping in mind this means deleting entire rows of data:",options=[x for x in column_names if x not in st.session_state["columns_to_replace_nulls"] and x not in st.session_state["columns_to_preserve_nulls"]],default=st.session_state.get("columns_to_delete_nulls", []))
         
-        st.session_state["columns_to_replace_nulls"] = st.multiselect("Select columns to replace null values with the column average:",options= [x for x in column_names if x not in st.session_state["columns_to_delete_nulls"] and x not in st.session_state["columns_to_preserve_nulls"]],default=st.session_state.get("columns_to_treat_normally",[]))
+        st.session_state["columns_to_replace_nulls"] = st.multiselect("Select columns to replace null values with the column average:",options= [x for x in column_names if x not in st.session_state["columns_to_delete_nulls"] and x not in st.session_state["columns_to_preserve_nulls"]],default=st.session_state.get("columns_to_replace_nulls",[]))
         
-        st.session_state["columns_to_preserve_nulls"] = st.multiselect("Select columns to preserve the null values as they are, without messing up indexing if you choose to delete nulls in other columns:",options= [x for x in column_names if x not in st.session_state["columns_to_replace_nulls"] and x not in st.session_state["columns_to_delete_nulls"]],default=st.session_state.get("columns_to_treat_normally",[]))
+        st.session_state["columns_to_preserve_nulls"] = st.multiselect("Select columns to preserve the null values as they are, without messing up indexing if you choose to delete nulls in other columns:",options= [x for x in column_names if x not in st.session_state["columns_to_replace_nulls"] and x not in st.session_state["columns_to_delete_nulls"]],default=st.session_state.get("columns_to_preserve_nulls",[]))
         
 
         df_temp = st.session_state["df_temp"]
