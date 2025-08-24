@@ -7,8 +7,14 @@ import seaborn as sns
 st.title("Welcome to the data cleaning app!")
 
 # This is for a variables used later on
-if "columns_to_keep" not in st.session_state:
-    st.session_state["columns_to_keep"] = []
+if "columns_to_delete_nulls" not in st.session_state:
+    st.session_state["columns_to_delete_nulls"] = []
+
+if "columns_to_preserve_nulls" not in st.session_state:
+    st.session_state["columns_to_preserve_nulls"] = []
+
+if "columns_to_replace_nulls" not in st.session_state:
+    st.session_state["columns_to_replace_nulls"] = []
 
 if "first_button_clicked" not in st.session_state:
     st.session_state["first_button_clicked"] = False
@@ -27,51 +33,6 @@ if "threshold" not in st.session_state:
         
 if "missing_val" not in st.session_state:
     st.session_state["missing_val"] = "hello"
-
-# The final step of data cleaning, once the user has selected their preferences about columns with too many missing values
-def choosing_final_format(unmodified_data_frame,reset_data_frame,missing_val=st.session_state["missing_val"]):
-        st.write("You can select each option and download each csv if you would like more than one option.")
-        choice = st.radio("Do you want to now remove all rows with null values, replace all null values, or recieve your data frame with any columns you decided to remove now removed?", ["Remove", "Replace","Recieve as is"])
-    
-        if choice == "Remove":
-            unmodified_data_frame = reset_data_frame
-            unmodified_data_frame = unmodified_data_frame.dropna().reset_index(drop=True)
-            unmodified_data_frame = unmodified_data_frame.replace("___MISSING VAL HiHi___",missing_val)
-            st.write("Here’s the head of your DataFrame:")
-            st.dataframe(unmodified_data_frame.head())
-            
-            
-        if choice == "Replace":
-            unmodified_data_frame = reset_data_frame
-            # Only replace NaNs in numeric columns
-            numeric_cols = unmodified_data_frame.select_dtypes(include=np.number).columns
-
-            for col in numeric_cols:
-                unmodified_data_frame[col] = unmodified_data_frame[col].fillna(unmodified_data_frame[col].mean())
-            unmodified_data_frame = unmodified_data_frame.replace("___MISSING VAL HiHi___",missing_val)
-            
-            st.write("Here’s the head of your DataFrame:")
-            st.dataframe(unmodified_data_frame.head())
-            
-        if choice == "Recieve as is":
-            unmodified_data_frame = reset_data_frame
-            unmodified_data_frame = unmodified_data_frame.replace("___MISSING VAL HiHi___",missing_val)
-            
-            st.write("Here’s the head of your DataFrame:")
-            st.dataframe(unmodified_data_frame.head())
-            
-        # Convert DataFrame to CSV bytes
-        csv_bytes = unmodified_data_frame.to_csv(index=False).encode('utf-8')
-    
-        # Download button
-        st.download_button(
-        label="Download CSV",
-        data=csv_bytes,
-        file_name="cleaned_data.csv",
-        mime="text/csv",
-        key = 'get it back'
-    )
-
 
 # Allow users to upload a CSV file (eventually expand to an option menu for many different file types)
 uploaded_file = st.file_uploader("Upload your CSV", type=["csv", "xlsx"])
@@ -113,41 +74,70 @@ if uploaded_file:
         threshold = st.session_state["threshold"]
         count_above = (missing_by_column > threshold).sum()
             
-        if count_above > 0:
-            st.write(f"We found {count_above} columns in your data frame with over 40% missing values. Choose which of them you would like to KEEP - if any. If you choose to remove/replace null values later, these columns will still be preserved exactly how they are.")
-            st.session_state["columns_to_keep"] = st.multiselect("Select columns to KEEP",options=missing_by_column[missing_by_column > threshold].index.tolist(),default=st.session_state.get("columns_to_keep", []))
-            columns_to_keep = st.session_state["columns_to_keep"]
-            df_temp = st.session_state["df_temp"]
-            df = st.session_state["df"]
-                
-            if st.button("Save my preferences"):
-                st.session_state["second_button_clicked"] = True
+        st.write(f"We found {count_above} columns in your data frame with over 40% missing values.")
 
-            if st.session_state["second_button_clicked"] == True:
-                    # Reloading the columns to preserve, the temporary dataframe with NaNs, and the original dataframe
-                    columns_to_keep = st.session_state["columns_to_keep"]
-                    df_temp = st.session_state["df_temp"]
-                    df = st.session_state["df"]
-                
-                    # Proceed only if there are values in columns_to_keep
-                    if columns_to_keep != None:
-                        # Save columns to be preserved
-                        df_temp_2 = df_temp[columns_to_keep]
-                        df_temp_2 = df_temp_2.replace(np.nan,"___MISSING VAL HiHi___")
+        st.session_state["count_above"] = count_above
+        
+        if count_above > 0:
+            st.write("These are the columns with over 40% missing values:")
+            st.write(missing_by_column[missing_by_column > threshold].index.tolist())
+        
+        st.write("""Choose how you would like to handle each of the columns in your dataframe, keeping in mind the columns with more than 40% missing values 
+        (printed above if there were any).  All unselected columns will be deleted. The multiselects will only show columns that have thus far not been selected. 
+        If you choose to delete null values in a column listed above, over 40% of your data could be deleted.""")
+        
+        column_names = missing_by_column[missing_by_column > threshold].index.tolist()
+        
+        st.session_state["columns_to_delete_nulls"] = st.multiselect("Select columns to delete all missing values from, keeping in mind this means deleting entire rows of data:",options=[x for x in column_names if x not in st.session_state["columns_to_replace_nulls"] and x not in st.session_state["columns_to_preserve_nulls"]],default=st.session_state.get("columns_to_keep", []))
+        
+        st.session_state["columns_to_replace_nulls"] = st.multiselect("Select columns to replace null values with the column average:",options= [x for x in column_names if x not in st.session_state["columns_to_delete_nulls"] and x not in st.session_state["columns_to_preserve_nulls"]],default=st.session_state.get("columns_to_treat_normally",[]))
+        
+        st.session_state["columns_to_preserve_nulls"] = st.multiselect("Select columns to preserve the null values as they are, without messing up indexing if you choose to delete nulls in other columns:",options= [x for x in column_names if x not in st.session_state["columns_to_replace_nulls"] and x not in st.session_state["columns_to_delete_nulls"]],default=st.session_state.get("columns_to_treat_normally",[]))
+        
+
+        df_temp = st.session_state["df_temp"]
+        df = st.session_state["df"]
+            
+        if st.button("Save my preferences"):
+            st.session_state["second_button_clicked"] = True
+
+        if st.session_state["second_button_clicked"] == True:
+                # Reloading the columns, now separated by user preferences
+            
+                columns_to_delete_nulls = st.session_state["columns_to_delete_nulls"]
+                columns_to_replace_nulls = st.session_state["columns_to_replace_nulls"]
+                columns_to_preserve_nulls = st.session_state["columns_to_preserve_nulls"]
+            
+                df_temp = st.session_state["df_temp"]
+                df = st.session_state["df"]
+                missing_val = st.session_state["missing_val"]
+
+                count_above = st.session_state["count_above"]
+            
+                df_for_deletions = df_temp[columns_to_delete_nulls]
+                df_for_replacements = df_temp[columns_to_replace_nulls]
+                df_for_preservation = df_temp[columns_to_preserve_nulls]
+
+                for col in df_for_replacements.columns:
+                    if df_for_replacements[col].isna().all():  # if entire column is NaN
+                        df_for_replacements[col] = 0  
+                    else:
+                        df_for_replacements[col].fillna(df_for_replacements[col].mean(), inplace=True)
                         
-                        # reload some variables
-                        missing_by_column = st.session_state['missing_by_column'] 
-                        threshold = st.session_state.get("threshold")
-                        
-                    for name in missing_by_column[missing_by_column > threshold].index.tolist():
-                        df_temp.drop(name,axis=1,inplace=True)
-                        
-                    if 'df_temp_2' in locals():
-                        df_temp = pd.concat([df_temp, df_temp_2],axis=1)
-                        working_df = df_temp
-                        choosing_final_format(df_temp,working_df)
-                    
-        else:
-            st.write("We found no columns with over 40% missing values.")
-            columns_to_keep = None
-            choosing_final_format(df,df_temp)
+                df_for_preservation = df_for_preservation.replace(np.nan,"__Missing__")
+
+                df_temp = pd.concat([df_for_replacements,df_for_deletions,df_for_preservation],axis=1)
+                df_temp = df_temp.dropna().reset_index(drop=True)
+                df_temp = df_temp.replace("__Missing__",np.nan)
+
+                # Convert DataFrame to CSV bytes
+                csv_bytes = df_temp.to_csv(index=False).encode('utf-8')
+            
+                # Download button
+                st.download_button(
+                label="Download CSV",
+                data=csv_bytes,
+                file_name="cleaned_data.csv",
+                mime="text/csv",
+                key = 'get it back'
+            )
